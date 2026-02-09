@@ -1,10 +1,15 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import permission_required, user_passes_test
-from django.views.generic.detail import DetailView  # ✅ Correction DetailView
-from django.contrib.auth import login, authenticate, logout  # ✅ Auth
-from django.contrib.auth.forms import UserCreationForm  # ✅ Auth Form
+from django.views.generic.detail import DetailView  
+from django.contrib.auth import login 
+from django.contrib.auth import authenticate
+from django.contrib.auth import logout  
 
-from .models import Book, Library, UserProfile
+from django.contrib.auth.forms import UserCreationForm  
+
+from .models import Book
+from .models import Library
+from .models import UserProfile
 
 # --- FUNCTION-BASED VIEW ---
 def list_books(request):
