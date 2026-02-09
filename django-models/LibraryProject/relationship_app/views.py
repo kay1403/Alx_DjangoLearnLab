@@ -1,7 +1,10 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import permission_required, user_passes_test
 from django.views.generic import DetailView
-from .models import Book, Library, UserProfile
+from .models import Book
+from .models import Library
+from .models import UserProfile
+
 
 # --- FUNCTION-BASED VIEW ---
 def list_books(request):
