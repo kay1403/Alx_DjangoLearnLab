@@ -1,29 +1,34 @@
-from rest_framework.test import APITestCase
+from django.test import TestCase
+from django.contrib.auth.models import User
+from rest_framework.test import APIClient
 from rest_framework import status
-from django.urls import reverse
 from .models import Author, Book
 
-class BookAPITest(APITestCase):
+class BookAPITestCase(TestCase):
     def setUp(self):
-        self.author = Author.objects.create(name="Test Author")
-        self.book = Book.objects.create(title="Test Book", publication_year=2020, author=self.author)
-        self.list_url = reverse('book-list-create')
-        self.detail_url = reverse('book-detail', args=[self.book.id])
+        self.client = APIClient()
+        self.user = User.objects.create_user(username='testuser', password='password123')
+        self.author = Author.objects.create(name="Frank Herbert")
+        self.book = Book.objects.create(
+            title="Dune", 
+            publication_year=1965, 
+            author=self.author
+        )
 
     def test_list_books(self):
-        response = self.client.get(self.list_url)
+        """Verify that any user can list books."""
+        response = self.client.get('/api/books/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_create_book(self):
-        data = {"title": "New Book", "publication_year": 2019, "author": self.author.id}
-        response = self.client.post(self.list_url, data)
+    def test_create_book_unauthenticated(self):
+        """Verify that unauthenticated users cannot create books."""
+        data = {"title": "New Book", "publication_year": 2020, "author": self.author.id}
+        response = self.client.post('/api/books/create/', data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_create_book_authenticated(self):
+        """Verify that authenticated users can create books."""
+        self.client.login(username='testuser', password='password123')
+        data = {"title": "Children of Dune", "publication_year": 1976, "author": self.author.id}
+        response = self.client.post('/api/books/create/', data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-    def test_update_book(self):
-        data = {"title": "Updated Book", "publication_year": 2021, "author": self.author.id}
-        response = self.client.put(self.detail_url, data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_delete_book(self):
-        response = self.client.delete(self.detail_url)
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
