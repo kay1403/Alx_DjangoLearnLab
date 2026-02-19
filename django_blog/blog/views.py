@@ -6,7 +6,7 @@ from django.db.models import Q
 from django.urls import reverse_lazy
 from .models import Post, Comment
 from .forms import UserRegisterForm, PostForm, CommentForm
-from taggit.models import Tag
+from .models import Tag
 
 
 # ========================

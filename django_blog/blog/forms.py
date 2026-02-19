@@ -20,12 +20,11 @@ class UserRegisterForm(UserCreationForm):
 # POST FORM WITH TAGS
 # ========================
 class PostForm(forms.ModelForm):
+    tags = forms.CharField(required=False)
+
     class Meta:
         model = Post
         fields = ['title', 'content', 'tags']
-        widgets = {
-            'tags': TagWidget(attrs={'class': 'form-control'}),
-        }
 
     def save(self, commit=True, user=None):
         post = super().save(commit=False)
@@ -33,7 +32,15 @@ class PostForm(forms.ModelForm):
             post.author = user
         if commit:
             post.save()
-            self.save_m2m()  # Nécessaire pour enregistrer les tags correctement
+
+            # gestion des tags
+            tag_names = self.cleaned_data['tags'].split(',')
+            for tag_name in tag_names:
+                tag_name = tag_name.strip()
+                if tag_name:
+                    tag, created = Tag.objects.get_or_create(name=tag_name)
+                    post.tags.add(tag)
+
         return post
 
 
