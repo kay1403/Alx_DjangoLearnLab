@@ -25,7 +25,9 @@ class PostForm(forms.ModelForm):
     class Meta:
         model = Post
         fields = ['title', 'content', 'tags']
-
+        widgets = {
+            'tags': TagWidget(),   
+        }
     def save(self, commit=True, user=None):
         post = super().save(commit=False)
         if user:
