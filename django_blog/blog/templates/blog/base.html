@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Django Blog</title>
+</head>
+<body>
+    <h1>Django Blog</h1>
+
+    <nav>
+        <a href="/">Home</a>
+        {% if user.is_authenticated %}
+            <a href="/post/new/">New Post</a>
+            <a href="/profile/">Profile</a>
+            <a href="/logout/">Logout</a>
+        {% else %}
+            <a href="/login/">Login</a>
+            <a href="/register/">Register</a>
+        {% endif %}
+    </nav>
+
+    <form method="GET" action="/search/">
+        <input type="text" name="q" placeholder="Search...">
+        <button type="submit">Search</button>
+    </form>
+
+    <hr>
+    {% block content %}{% endblock %}
+</body>
+</html>

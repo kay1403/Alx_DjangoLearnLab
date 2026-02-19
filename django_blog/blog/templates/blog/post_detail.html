@@ -1,0 +1,38 @@
+{% extends 'blog/base.html' %}
+{% block content %}
+
+<h2>{{ object.title }}</h2>
+<p>{{ object.content }}</p>
+<p>By {{ object.author }} | {{ object.published_date }}</p>
+
+<p>Tags:
+{% for tag in object.tags.all %}
+    {{ tag.name }}
+{% empty %}
+    No tags
+{% endfor %}
+</p>
+
+{% if user == object.author %}
+    <a href="{% url 'post-update' object.pk %}">Edit</a>
+    <a href="{% url 'post-delete' object.pk %}">Delete</a>
+{% endif %}
+
+<hr>
+<h3>Comments</h3>
+
+{% for comment in object.comments.all %}
+    <p>{{ comment.content }} - {{ comment.author }}</p>
+{% empty %}
+    <p>No comments yet.</p>
+{% endfor %}
+
+{% if user.is_authenticated %}
+<form method="POST" action="{% url 'add-comment' object.pk %}">
+    {% csrf_token %}
+    <textarea name="content" required></textarea>
+    <button type="submit">Add Comment</button>
+</form>
+{% endif %}
+
+{% endblock %}
