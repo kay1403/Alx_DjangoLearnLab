@@ -40,6 +40,12 @@ class PostDetailView(DetailView):
     model = Post
     template_name = 'blog/post_detail.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = CommentForm()
+        return context
+
+
 
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
@@ -95,9 +101,8 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
     form_class = CommentForm
 
     def form_valid(self, form):
-        post_id = self.kwargs['post_id']
         form.instance.author = self.request.user
-        form.instance.post = get_object_or_404(Post, pk=post_id)
+        form.instance.post = get_object_or_404(Post, pk=self.kwargs['pk'])
         return super().form_valid(form)
 
 # Mettre à jour un commentaire
