@@ -7,6 +7,7 @@ from django.urls import reverse_lazy
 from .models import Post, Comment
 from .forms import UserRegisterForm, PostForm, CommentForm
 from .models import Tag
+from django.contrib.auth.decorators import login_required
 
 
 # ========================
@@ -25,8 +26,10 @@ def register(request):
     return render(request, 'blog/register.html', {'form': form})
 
 
+@login_required
 def profile(request):
     return render(request, 'blog/profile.html')
+
 
 
 # ========================
