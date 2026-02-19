@@ -1,7 +1,9 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Post, Comment, Tag
+from .models import Post, Tag
+from django import forms
+from .models import Comment
 
 
 class UserRegisterForm(UserCreationForm):
@@ -34,7 +36,13 @@ class PostForm(forms.ModelForm):
         return post
 
 
+
+
 class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
         fields = ['content']
+        widgets = {
+            'content': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Write a comment...'}),
+        }
+

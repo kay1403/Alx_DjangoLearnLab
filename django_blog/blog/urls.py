@@ -14,8 +14,13 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('profile/', profile, name='profile'),
 
-    path('post/<int:pk>/comment/', add_comment, name='add-comment'),
+    #path('post/<int:pk>/comment/', add_comment, name='add-comment'),
     path('search/', search, name='search'),
    # path('', include('blog.urls')),
+
+   # COMMENTS CRUD
+    path('posts/<int:post_id>/comments/new/', CommentCreateView.as_view(), name='comment-create'),
+    path('comments/<int:pk>/edit/', CommentUpdateView.as_view(), name='comment-update'),
+    path('comments/<int:pk>/delete/', CommentDeleteView.as_view(), name='comment-delete'),
 
 ]

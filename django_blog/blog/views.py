@@ -6,6 +6,8 @@ from django.db.models import Q
 from django.urls import reverse_lazy
 from .models import Post, Comment, Tag
 from .forms import UserRegisterForm, PostForm, CommentForm
+from django.shortcuts import get_object_or_404
+
 
 
 # AUTHENTICATION
@@ -73,18 +75,7 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return self.request.user == post.author
 
 
-# COMMENTS
 
-def add_comment(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-    if request.method == 'POST' and request.user.is_authenticated:
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            comment = form.save(commit=False)
-            comment.author = request.user
-            comment.post = post
-            comment.save()
-    return redirect('post-detail', pk=pk)
 
 
 # SEARCH
@@ -97,3 +88,34 @@ def search(request):
         Q(tags__name__icontains=query)
     )
     return render(request, 'blog/search_results.html', {'results': results})
+
+# Créer un commentaire
+class CommentCreateView(LoginRequiredMixin, CreateView):
+    model = Comment
+    form_class = CommentForm
+
+    def form_valid(self, form):
+        post_id = self.kwargs['post_id']
+        form.instance.author = self.request.user
+        form.instance.post = get_object_or_404(Post, pk=post_id)
+        return super().form_valid(form)
+
+# Mettre à jour un commentaire
+class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Comment
+    form_class = CommentForm
+
+    def test_func(self):
+        comment = self.get_object()
+        return self.request.user == comment.author
+
+# Supprimer un commentaire
+class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Comment
+
+    def test_func(self):
+        comment = self.get_object()
+        return self.request.user == comment.author
+
+    def get_success_url(self):
+        return self.object.post.get_absolute_url()
