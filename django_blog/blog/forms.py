@@ -1,11 +1,13 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Post, Tag
-from django import forms
-from .models import Comment
+from .models import Post, Comment
+from taggit.forms import TagWidget
 
 
+# ========================
+# USER REGISTER FORM
+# ========================
 class UserRegisterForm(UserCreationForm):
     email = forms.EmailField()
 
@@ -14,12 +16,16 @@ class UserRegisterForm(UserCreationForm):
         fields = ['username', 'email', 'password1', 'password2']
 
 
+# ========================
+# POST FORM WITH TAGS
+# ========================
 class PostForm(forms.ModelForm):
-    tag_names = forms.CharField(required=False, help_text="Comma separated tags")
-
     class Meta:
         model = Post
-        fields = ['title', 'content', 'tag_names']
+        fields = ['title', 'content', 'tags']
+        widgets = {
+            'tags': TagWidget(attrs={'class': 'form-control'}),
+        }
 
     def save(self, commit=True, user=None):
         post = super().save(commit=False)
@@ -27,22 +33,20 @@ class PostForm(forms.ModelForm):
             post.author = user
         if commit:
             post.save()
-            tag_names = self.cleaned_data.get('tag_names')
-            if tag_names:
-                tags = tag_names.split(',')
-                for tag in tags:
-                    tag_obj, created = Tag.objects.get_or_create(name=tag.strip())
-                    post.tags.add(tag_obj)
+            self.save_m2m()  # Nécessaire pour enregistrer les tags correctement
         return post
 
 
-
-
+# ========================
+# COMMENT FORM
+# ========================
 class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
         fields = ['content']
         widgets = {
-            'content': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Write a comment...'}),
+            'content': forms.Textarea(attrs={
+                'rows': 3,
+                'placeholder': 'Write a comment...'
+            }),
         }
-

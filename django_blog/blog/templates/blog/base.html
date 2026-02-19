@@ -18,10 +18,11 @@
         {% endif %}
     </nav>
 
-    <form method="GET" action="/search/">
-        <input type="text" name="q" placeholder="Search...">
-        <button type="submit">Search</button>
-    </form>
+   <form action="{% url 'search' %}" method="get">
+    <input type="text" name="q" placeholder="Search posts..." value="{{ request.GET.q }}">
+    <button type="submit">Search</button>
+</form>
+
 
     <hr>
     {% block content %}{% endblock %}
