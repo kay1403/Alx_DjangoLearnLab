@@ -3,6 +3,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Post, Comment, Like
 from .serializers import PostSerializer, CommentSerializer
+from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth import get_user_model
+
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -33,11 +36,14 @@ class FeedView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        # Récupère les utilisateurs que l'utilisateur connecté suit
         following_users = request.user.following.all()
-        posts = Post.objects.filter(user__in=following_users).order_by('-created_at')
+
+        # Récupère les posts de ces utilisateurs, triés par date de création décroissante
+        posts = Post.objects.filter(author__in=following_users).order_by('-created_at')
+
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
-
 class LikePostView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
