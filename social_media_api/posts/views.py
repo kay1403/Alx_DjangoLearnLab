@@ -6,6 +6,7 @@ from .serializers import PostSerializer, CommentSerializer
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
 from notifications.models import Notification
+from django.shortcuts import get_object_or_404
 
 
 
