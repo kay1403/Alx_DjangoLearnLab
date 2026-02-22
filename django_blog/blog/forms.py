@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from .models import Post, Comment
 from taggit.forms import TagWidget
+from .models import Tag
 
 
 # ========================
@@ -28,21 +29,16 @@ class PostForm(forms.ModelForm):
         widgets = {
             'tags': TagWidget(),   
         }
-    def save(self, commit=True, user=None):
+    
+    def save(self, user):
         post = super().save(commit=False)
-        if user:
-            post.author = user
-        if commit:
-            post.save()
-
-            # gestion des tags
-            tag_names = self.cleaned_data['tags'].split(',')
-            for tag_name in tag_names:
-                tag_name = tag_name.strip()
-                if tag_name:
-                    tag, created = Tag.objects.get_or_create(name=tag_name)
-                    post.tags.add(tag)
-
+        post.author = user
+        post.save()
+    
+        tags_list = self.cleaned_data['tags'].split(',') 
+        for tag_name in tags_list:
+            post.tags.add(tag_name.strip())  
+    
         return post
 
 
