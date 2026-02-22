@@ -47,18 +47,6 @@ class FeedView(APIView):
 
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
-class LikePostView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def post(self, request, pk):
-        post = Post.objects.get(pk=pk)
-        Like.objects.get_or_create(user=request.user, post=post)
-        return Response({'status': 'liked'})
-
-    def delete(self, request, pk):
-        post = Post.objects.get(pk=pk)
-        Like.objects.filter(user=request.user, post=post).delete()
-        return Response({'status': 'unliked'})
 
 
 class LikePostView(APIView):
