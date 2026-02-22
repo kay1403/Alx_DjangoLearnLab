@@ -1,5 +1,4 @@
 from rest_framework import generics, viewsets, permissions
-from django.contrib.auth import get_user_model
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -7,6 +6,9 @@ from rest_framework.authtoken.models import Token
 from .serializers import RegisterSerializer, UserSerializer
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from django.shortcuts import get_object_or_404
+from django.contrib.auth import get_user_model
+
 
 
 User = get_user_model()
@@ -38,20 +40,7 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    @action(detail=True, methods=['post'])
-    def follow(self, request, pk=None):
-        user_to_follow = self.get_object()
-        request.user.following.add(user_to_follow)
-        return Response({'status': 'followed'})
-
-    @action(detail=True, methods=['post'])
-    def unfollow(self, request, pk=None):
-        user_to_unfollow = self.get_object()
-        request.user.following.remove(user_to_unfollow)
-        return Response({'status': 'unfollowed'})
-
-
-
+    
 
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
@@ -59,3 +48,23 @@ class ProfileView(APIView):
     def get(self, request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
+    
+
+
+
+class FollowUserView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, user_id):
+        user_to_follow = get_object_or_404(User.objects.all(), id=user_id)
+        request.user.following.add(user_to_follow)
+        return Response({'status': 'followed'})
+
+
+class UnfollowUserView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, user_id):
+        user_to_unfollow = get_object_or_404(User.objects.all(), id=user_id)
+        request.user.following.remove(user_to_unfollow)
+        return Response({'status': 'unfollowed'})
