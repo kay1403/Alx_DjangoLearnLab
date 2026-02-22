@@ -5,6 +5,8 @@ from .models import Post, Comment, Like
 from .serializers import PostSerializer, CommentSerializer
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
+from notifications.models import Notification
+
 
 
 
@@ -55,4 +57,30 @@ class LikePostView(APIView):
     def delete(self, request, pk):
         post = Post.objects.get(pk=pk)
         Like.objects.filter(user=request.user, post=post).delete()
+        return Response({'status': 'unliked'})
+
+
+class LikePostView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        post = get_object_or_404(Post, pk=pk)
+        post.likes.add(request.user)
+
+        # Créer notification
+        if post.author != request.user:
+            Notification.objects.create(
+                recipient=post.author,
+                actor=request.user,
+                verb='liked your post',
+                target=post
+            )
+        return Response({'status': 'liked'})
+
+class UnlikePostView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        post = get_object_or_404(Post, pk=pk)
+        post.likes.remove(request.user)
         return Response({'status': 'unliked'})
