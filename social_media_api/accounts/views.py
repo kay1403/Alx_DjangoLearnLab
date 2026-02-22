@@ -5,6 +5,9 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.authtoken.models import Token
 from .serializers import RegisterSerializer, UserSerializer
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+
 
 User = get_user_model()
 
@@ -46,3 +49,13 @@ class UserViewSet(viewsets.ModelViewSet):
         user_to_unfollow = self.get_object()
         request.user.following.remove(user_to_unfollow)
         return Response({'status': 'unfollowed'})
+
+
+
+
+class ProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
