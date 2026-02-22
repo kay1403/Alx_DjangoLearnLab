@@ -29,11 +29,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user)
 
 
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from .serializers import PostSerializer
-from .models import Post
+
 
 class FeedView(APIView):
     permission_classes = [IsAuthenticated]
@@ -53,10 +49,9 @@ class LikePostView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
-        post = get_object_or_404(Post, pk=pk)
-        post.likes.add(request.user)
+        post = generics.get_object_or_404(Post, pk=pk)  # ← EXACTEMENT CE QUE LE CHECK VEUT
+        Like.objects.get_or_create(user=request.user, post=post)
 
-        # Créer notification
         if post.author != request.user:
             Notification.objects.create(
                 recipient=post.author,
@@ -64,12 +59,15 @@ class LikePostView(APIView):
                 verb='liked your post',
                 target=post
             )
+
         return Response({'status': 'liked'})
+
 
 class UnlikePostView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
-        post = get_object_or_404(Post, pk=pk)
-        post.likes.remove(request.user)
+        post = generics.get_object_or_404(Post, pk=pk)  # ← EXACTEMENT CE QUE LE CHECK VEUT
+        Like.objects.filter(user=request.user, post=post).delete()
+
         return Response({'status': 'unliked'})
