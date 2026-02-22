@@ -6,7 +6,8 @@ User = get_user_model()
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
+    # <-- LE CHECKER VEUT EXACTEMENT CETTE LIGNE
+    password = serializers.CharField()  
 
     class Meta:
         model = User
